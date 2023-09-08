@@ -132,10 +132,12 @@ public:
 
 	void Pop()
 	{
+		// shift all items in queue down by one
 		for (int i = 1; i < size; i++)
 		{
 			data[i - 1] = data[i];
 		}
+		// remove item on the end and decrease size
 		data[size - 1] = NULL;
 		size--;
 	}
