@@ -60,7 +60,8 @@ public:
 		}
 
 	}
-
+	
+	// prints all elements in queue
 	void Print(void)
 	{
 		for (int i = 0; i < size; i++)
@@ -74,32 +75,88 @@ public:
 		AlbertoClass newAlberto = AlbertoClass(age);
 
 		// check if queue is full
-		// if not, add new alberto
-		if (capacity > size)
+		// if full
+		if (capacity <= size)
 		{
-			data[size] = newAlberto;
-			size++;
-		}
-		// if queue is full, double capacity
-		else
-		{
-			tempArray = new T[capacity * 2];
+			// double capacity
+			capacity *= 2;
+
+			// create temporary array
+			T* tempArray = new T[capacity];
+
+			// copy to temporary array
 			for (int i = 0; i < capacity; i++)
 			{
 				tempArray[i] = data[i];
 			}
+
 			// add new alberto to the end
 			tempArray[size] = newAlberto;
-			// copy new array to current array
+
+			// get rid of old array
+			delete[] data;
+
+			// update data pointer
 			data = tempArray;
-			size++;
-			capacity = capacity * 2;
 		}
+		// if not full, add alberto as normal
+		else
+		{
+			data[size] = newAlberto;
+		}
+		size++;
+		Sort();
 	}
+
 	// sorts albertos in the queue
 	void Sort()
 	{
+		// checks each alberto
+		for (int i = 0; i < size; i++)
+		{
+			// and compares to every other alberto
+			for (int j = 0; j < size; j++)
+			{
+				// if alberto1 < alberto2, swap places
+				if (data[i] < data[j])
+				{
+					T temp = data[i];
+					data[i] = data[j];
+					data[j] = temp;
+				}
+			}
+		}
+	}
 
+	// removes alberto at the front of the queue
+
+	void Pop()
+	{
+		for (int i = 1; i < size; i++)
+		{
+			data[i - 1] = data[i];
+		}
+		data[size - 1] = NULL;
+		size--;
+	}
+
+	// returns size of the queue
+	int GetSize()
+	{
+		return size;
+	}
+
+	// returns whether the queue is empty
+	bool IsEmpty()
+	{
+		if (size == 0)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 	}
 
 };

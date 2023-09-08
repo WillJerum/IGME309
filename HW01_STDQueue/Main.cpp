@@ -21,11 +21,67 @@ void Print(std::deque<T> a_queue)
 int main(void)
 {
 	MyQueue<AlbertoClass> myQueue;
-	myQueue.Push(38);
+
+	// check if queue is empty
+	std::cout << "Is queue empty? ";
+	if (myQueue.IsEmpty())
+	{
+		std::cout << "true \n";
+	}
+	else
+	{
+		std::cout << "false \n";
+	};
+
+	// check size
+	std::cout << "Getting size of queue... " 
+		<< myQueue.GetSize() << "\n";
+
+	// add elements to queue
+	std::cout << "Pushing new Albertos... \n";
 	myQueue.Push(49);
+	myQueue.Push(38);
+
+	// print queue
+	std::cout << "Current contents of queue: \n";
 	myQueue.Print();
+
+	// check if queue is empty
+	std::cout << "Is queue empty? ";
+	if (myQueue.IsEmpty())
+	{
+		std::cout << "true \n";
+	}
+	else
+	{
+		std::cout << "false \n";
+	}
+
+	// check size of queue
+	std::cout << "Getting size of queue... "
+		<< myQueue.GetSize() << "\n";
+
+	// push new elements to queue
+	std::cout << "Pushing new Albertos... \n";
 	myQueue.Push(50);
+	myQueue.Push(20);
+
+	// print queue
+	std::cout << "Current contents of queue: \n";
 	myQueue.Print();
+
+	// pop element
+	std::cout << "Popping first element of queue... \n";
+	myQueue.Pop();
+
+	// check size of queue
+	std::cout << "Getting size of queue... "
+		<< myQueue.GetSize() << "\n";
+
+	// print queue
+	std::cout << "Current contents of queue: \n";
+	myQueue.Print();
+
 	getchar();
 
 	/*
