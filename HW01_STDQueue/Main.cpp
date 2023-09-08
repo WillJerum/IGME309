@@ -1,5 +1,11 @@
 #include "Main.h"
+#include "Alberto.h"
+#include "MyQueue.h"
 template <typename T> 
+
+
+
+
 void Print(std::deque<T> a_queue)
 {
 	std::cout << "Begining of queue......." << std::endl;
@@ -14,6 +20,15 @@ void Print(std::deque<T> a_queue)
 
 int main(void)
 {
+	MyQueue<AlbertoClass> myQueue;
+	myQueue.Push(38);
+	myQueue.Push(49);
+	myQueue.Print();
+	myQueue.Push(50);
+	myQueue.Print();
+	getchar();
+
+	/*
 	std::deque<int> myQueue;
 	//Push elements
 	myQueue.push_back(0);
@@ -84,4 +99,5 @@ int main(void)
 
 	
 	getchar();
+	*/
 }

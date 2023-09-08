@@ -7,6 +7,7 @@ on: 2017/06/02
 #include <iostream>
 #include <deque>
 #include "Alberto.h"
+#include "MyQueue.h"
 #define uint unsigned int
 struct Foo
 {
