@@ -9,17 +9,20 @@ out vec4 Fragment;
 
 void main()
 {
+
+	vec3 result = Color;
+
 	if(SolidColor.r != -1.0 && SolidColor.g != -1.0 && SolidColor.b != -1.0)
 	{
-		Color = SolidColor;
+		result = SolidColor;
 	}
 	
 	if(Complimentary == true)
 	{
-		Color = vec3(1.0f, 1.0f, 1.0f) - Color;
+		result = vec3(1.0, 1.0, 1.0) - result;
 	}
 	
-	Fragment = vec4(Color,1);
+	Fragment = vec4(result,1);
 		
 	return;
 }
