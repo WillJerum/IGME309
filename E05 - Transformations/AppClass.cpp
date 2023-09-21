@@ -9,8 +9,12 @@ void Application::InitVariables(void)
 	m_pCameraMngr->SetPositionTargetAndUpward(v3Position, v3Target, v3Upward);
 
 	//Allocate the memory for the Meshes
-	m_pMesh = new MyMesh();
-	m_pMesh->GenerateCube(1.0f, C_BLACK);
+	for (int i = 0; i < 46; i++)
+	{
+		MyMesh* mesh = new MyMesh();
+		meshList.push_back(mesh);
+		mesh->GenerateCube(1.0f, C_BLACK);
+	}
 		
 }
 void Application::Update(void)
@@ -39,7 +43,128 @@ void Application::Display(void)
 	matrix4 m4Projection = m_pCameraMngr->GetProjectionMatrix();
 	matrix4 m4View = m_pCameraMngr->GetViewMatrix();
 
-	m_pMesh->Render(m4Projection, m4View, ToMatrix4(m_qArcBall));
+	// track time - for use in transformations
+	static float currentTime = 0;
+	static uint newClock = m_pSystem->GenClock();
+	currentTime += m_pSystem->GetDeltaTime(newClock);
+
+	// set up translations
+	float xPos = 0.0f;
+	vector3 position(xPos, 0.0f, 0.0f);
+	position.x = xPos + currentTime;
+	
+
+	// draw meshes to screen
+	matrix4 m4Position = glm::translate(vector3(2.0f, 0.0f, 0.0f)) * glm::translate(position);
+	int i = 0;
+
+	// row 1
+	meshList[i]->Render(m4Projection, m4View, glm::translate(m4Position, vector3(0.0f)));
+	i++;
+	meshList[i]->Render(m4Projection, m4View, glm::translate(m4Position, vector3(6.0f, 0.0f, 0.0f)));
+	i++;
+
+	// row 2
+	meshList[i]->Render(m4Projection, m4View, glm::translate(m4Position, vector3(1.0f, -1.0f, 0.0f)));
+	i++;
+	meshList[i]->Render(m4Projection, m4View, glm::translate(m4Position, vector3(5.0f, -1.0f, 0.0f)));
+	i++;
+
+	// row 3
+	meshList[i]->Render(m4Projection, m4View, glm::translate(m4Position, vector3(0.0f, -2.0f, 0.0f)));
+	i++;																				
+	meshList[i]->Render(m4Projection, m4View, glm::translate(m4Position, vector3(1.0f, -2.0f, 0.0f)));
+	i++;																				
+	meshList[i]->Render(m4Projection, m4View, glm::translate(m4Position, vector3(2.0f, -2.0f, 0.0f)));
+	i++;																				
+	meshList[i]->Render(m4Projection, m4View, glm::translate(m4Position, vector3(3.0f, -2.0f, 0.0f)));
+	i++;																				
+	meshList[i]->Render(m4Projection, m4View, glm::translate(m4Position, vector3(4.0f, -2.0f, 0.0f)));
+	i++;																				
+	meshList[i]->Render(m4Projection, m4View, glm::translate(m4Position, vector3(5.0f, -2.0f, 0.0f)));
+	i++;																				
+	meshList[i]->Render(m4Projection, m4View, glm::translate(m4Position, vector3(6.0f, -2.0f, 0.0f)));
+	i++;
+
+	// row 4
+	meshList[i]->Render(m4Projection, m4View, glm::translate(m4Position, vector3(-1.0f, -3.0f, 0.0f)));
+	i++;
+	meshList[i]->Render(m4Projection, m4View, glm::translate(m4Position, vector3(0.0f, -3.0f, 0.0f)));
+	i++;
+	meshList[i]->Render(m4Projection, m4View, glm::translate(m4Position, vector3(2.0f, -3.0f, 0.0f)));
+	i++;
+	meshList[i]->Render(m4Projection, m4View, glm::translate(m4Position, vector3(3.0f, -3.0f, 0.0f)));
+	i++;
+	meshList[i]->Render(m4Projection, m4View, glm::translate(m4Position, vector3(4.0f, -3.0f, 0.0f)));
+	i++;
+	meshList[i]->Render(m4Projection, m4View, glm::translate(m4Position, vector3(6.0f, -3.0f, 0.0f)));
+	i++;
+	meshList[i]->Render(m4Projection, m4View, glm::translate(m4Position, vector3(7.0f, -3.0f, 0.0f)));
+	i++;
+
+	// row 5
+	meshList[i]->Render(m4Projection, m4View, glm::translate(m4Position, vector3(-2.0f, -4.0f, 0.0f)));
+	i++;
+	meshList[i]->Render(m4Projection, m4View, glm::translate(m4Position, vector3(-1.0f, -4.0f, 0.0f)));
+	i++;
+	meshList[i]->Render(m4Projection, m4View, glm::translate(m4Position, vector3(0.0f, -4.0f, 0.0f)));
+	i++;
+	meshList[i]->Render(m4Projection, m4View, glm::translate(m4Position, vector3(1.0f, -4.0f, 0.0f)));
+	i++;
+	meshList[i]->Render(m4Projection, m4View, glm::translate(m4Position, vector3(2.0f, -4.0f, 0.0f)));
+	i++;
+	meshList[i]->Render(m4Projection, m4View, glm::translate(m4Position, vector3(3.0f, -4.0f, 0.0f)));
+	i++;
+	meshList[i]->Render(m4Projection, m4View, glm::translate(m4Position, vector3(4.0f, -4.0f, 0.0f)));
+	i++;
+	meshList[i]->Render(m4Projection, m4View, glm::translate(m4Position, vector3(5.0f, -4.0f, 0.0f)));
+	i++;
+	meshList[i]->Render(m4Projection, m4View, glm::translate(m4Position, vector3(6.0f, -4.0f, 0.0f)));
+	i++;
+	meshList[i]->Render(m4Projection, m4View, glm::translate(m4Position, vector3(7.0f, -4.0f, 0.0f)));
+	i++;
+	meshList[i]->Render(m4Projection, m4View, glm::translate(m4Position, vector3(8.0f, -4.0f, 0.0f)));
+	i++;
+
+	// row 6
+	meshList[i]->Render(m4Projection, m4View, glm::translate(m4Position, vector3(-2.0f, -5.0f, 0.0f)));
+	i++;
+	meshList[i]->Render(m4Projection, m4View, glm::translate(m4Position, vector3(0.0f, -5.0f, 0.0f)));
+	i++;
+	meshList[i]->Render(m4Projection, m4View, glm::translate(m4Position, vector3(1.0f, -5.0f, 0.0f)));
+	i++;
+	meshList[i]->Render(m4Projection, m4View, glm::translate(m4Position, vector3(2.0f, -5.0f, 0.0f)));
+	i++;
+	meshList[i]->Render(m4Projection, m4View, glm::translate(m4Position, vector3(3.0f, -5.0f, 0.0f)));
+	i++;
+	meshList[i]->Render(m4Projection, m4View, glm::translate(m4Position, vector3(4.0f, -5.0f, 0.0f)));
+	i++;
+	meshList[i]->Render(m4Projection, m4View, glm::translate(m4Position, vector3(5.0f, -5.0f, 0.0f)));
+	i++;
+	meshList[i]->Render(m4Projection, m4View, glm::translate(m4Position, vector3(6.0f, -5.0f, 0.0f)));
+	i++;
+	meshList[i]->Render(m4Projection, m4View, glm::translate(m4Position, vector3(8.0f, -5.0f, 0.0f)));
+	i++;
+
+	// row 7
+	meshList[i]->Render(m4Projection, m4View, glm::translate(m4Position, vector3(-2.0f, -6.0f, 0.0f)));
+	i++;
+	meshList[i]->Render(m4Projection, m4View, glm::translate(m4Position, vector3(0.0f, -6.0f, 0.0f)));
+	i++;
+	meshList[i]->Render(m4Projection, m4View, glm::translate(m4Position, vector3(6.0f, -6.0f, 0.0f)));
+	i++;
+	meshList[i]->Render(m4Projection, m4View, glm::translate(m4Position, vector3(8.0f, -6.0f, 0.0f)));
+	i++;
+
+	// row 8
+	meshList[i]->Render(m4Projection, m4View, glm::translate(m4Position, vector3(1.0f, -7.0f, 0.0f)));
+	i++;
+	meshList[i]->Render(m4Projection, m4View, glm::translate(m4Position, vector3(2.0f, -7.0f, 0.0f)));
+	i++;
+	meshList[i]->Render(m4Projection, m4View, glm::translate(m4Position, vector3(4.0f, -7.0f, 0.0f)));
+	i++;
+	meshList[i]->Render(m4Projection, m4View, glm::translate(m4Position, vector3(5.0f, -7.0f, 0.0f)));
+	i++;
 
 	// draw a skybox
 	m_pModelMngr->AddSkyboxToRenderList();
@@ -59,7 +184,13 @@ void Application::Display(void)
 void Application::Release(void)
 {
 	//Release meshes
-	SafeDelete(m_pMesh);
+	for (int i = 0; i < 46; i++)
+	{
+		if (meshList[i] != nullptr)
+		{
+			SafeDelete(meshList[i]);
+		}
+	}
 
 	//release GUI
 	ShutdownGUI();

@@ -15,6 +15,7 @@ void Application::InitVariables(void)
 		MyMesh* pMesh = new MyMesh();
 		m_pMeshList.push_back(pMesh);
 		m_pMeshList[i]->GenerateCube(1.0f, C_BLACK);
+		
 	}
 }
 void Application::Update(void)

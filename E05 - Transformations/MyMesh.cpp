@@ -218,6 +218,7 @@ void MyMesh::GenerateCube(float a_fSize, vector3 a_v3Color)
 	CompleteMesh(a_v3Color);
 	CompileOpenGL3X();
 }
+
 void MyMesh::GenerateCuboid(vector3 a_v3Dimensions, vector3 a_v3Color)
 {
 	Release();
