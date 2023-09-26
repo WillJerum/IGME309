@@ -128,6 +128,8 @@ void Application::ProcessKeyboard(void)
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::R))
 	{
 		m_v3Rotation = vector3(0.0f);
+		// reset orientation
+		m_qOrientation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
 	}
 }
 //Mouse
