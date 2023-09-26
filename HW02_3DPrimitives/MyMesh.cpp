@@ -169,8 +169,49 @@ void MyMesh::GenerateTube(float a_fOuterRadius, float a_fInnerRadius, float a_fH
 	Init();
 
 	// Replace this with your code
-	GenerateCube(a_fOuterRadius * 2.0f, a_v3Color);
+	std::vector<vector3> vertexTopOuter;    // Store vertices for the top outer circle
+	std::vector<vector3> vertexBottomOuter; // Store vertices for the bottom outer circle
+	std::vector<vector3> vertexTopInner;    // Store vertices for the top inner circle
+	std::vector<vector3> vertexBottomInner; // Store vertices for the bottom inner circle
+
+	GLfloat theta = 0;
+	GLfloat delta = static_cast<GLfloat>(2.0 * PI / static_cast<GLfloat>(a_nSubdivisions));
+
+	// Generate vertices for the top and bottom outer circles and inner circles
+	for (int i = 0; i < a_nSubdivisions; i++)
+	{
+		vector3 tempTopOuter = vector3(cos(theta) * a_fOuterRadius, a_fHeight * 0.5f, sin(theta) * a_fOuterRadius);
+		vector3 tempBottomOuter = vector3(cos(theta) * a_fOuterRadius, -a_fHeight * 0.5f, sin(theta) * a_fOuterRadius);
+		vector3 tempTopInner = vector3(cos(theta) * a_fInnerRadius, a_fHeight * 0.5f, sin(theta) * a_fInnerRadius);
+		vector3 tempBottomInner = vector3(cos(theta) * a_fInnerRadius, -a_fHeight * 0.5f, sin(theta) * a_fInnerRadius);
+
+		theta += delta;
+
+		vertexTopOuter.push_back(tempTopOuter);
+		vertexBottomOuter.push_back(tempBottomOuter);
+		vertexTopInner.push_back(tempTopInner);
+		vertexBottomInner.push_back(tempBottomInner);
+	}
+
+	// Generate triangles for the top and bottom outer circles
+	for (int i = 0; i < a_nSubdivisions; i++)
+	{
+		// Top outer circle
+		AddQuad(vertexTopInner[i], vertexTopInner[(i + 1) % a_nSubdivisions], vertexTopOuter[i], vertexTopOuter[(i + 1) % a_nSubdivisions]);
+
+		// Bottom outer circle
+		AddQuad(vertexBottomOuter[i], vertexBottomOuter[(i + 1) % a_nSubdivisions], vertexBottomInner[i], vertexBottomInner[(i + 1) % a_nSubdivisions]);
+	}
+
+	// Generate side walls
+	for (int i = 0; i < a_nSubdivisions; i++)
+	{
+		AddQuad(vertexTopOuter[i], vertexTopOuter[(i + 1) % a_nSubdivisions], vertexBottomOuter[i], vertexBottomOuter[(i + 1) % a_nSubdivisions]);
+		AddQuad(vertexTopInner[(i + 1) % a_nSubdivisions], vertexTopInner[i], vertexBottomInner[(i + 1) % a_nSubdivisions], vertexBottomInner[i]);
+	}
 	// -------------------------------
+
+
 
 	// Adding information about color
 	CompleteMesh(a_v3Color);
