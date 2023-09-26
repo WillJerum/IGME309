@@ -61,24 +61,25 @@ void MyMesh::GenerateCone(float a_fRadius, float a_fHeight, int a_nSubdivisions,
 	Init();
 
 	// Replace this with your code
-	
-	// Generate base
 
 	std::vector<vector3 > vertex;
 	GLfloat theta = 0;
 	GLfloat delta = static_cast<GLfloat>(2.0 * PI / static_cast<GLfloat>(a_nSubdivisions));
-	vector3 apex = vector3(0.0f, a_fHeight, 0.0f);
+	vector3 apex = vector3(0.0f, (a_fHeight/2), 0.0f);
+	vector3 baseCenter = vector3(0.0f, (-a_fHeight / 2), 0.0f);
 
 	for (int i = 0; i < a_nSubdivisions; i++)
 	{
-		vector3 temp = vector3(cos(theta) * a_fRadius,  0.0f, sin(theta) * a_fRadius);
+		vector3 temp = vector3(cos(theta) * a_fRadius,  (-a_fHeight/2), sin(theta)* a_fRadius);
 		theta += delta;
 		vertex.push_back(temp);
 	}
 
 	for (int i = 0; i < a_nSubdivisions; i++)
 	{
-		AddTri(ZERO_V3, vertex[i], vertex[(i + 1) % a_nSubdivisions]);
+		// Generate base
+		AddTri(baseCenter, vertex[i], vertex[(i + 1) % a_nSubdivisions]);
+		// Connect base to apex
 		AddTri(vertex[i], apex, vertex[(i + 1) % a_nSubdivisions]);
 	}
 
@@ -104,8 +105,41 @@ void MyMesh::GenerateCylinder(float a_fRadius, float a_fHeight, int a_nSubdivisi
 	Release();
 	Init();
 
-	// Replace this with your code
-	GenerateCube(a_fRadius * 2.0f, a_v3Color);
+	std::vector<vector3> vertexTop;    // Store vertices for the top circle
+	std::vector<vector3> vertexBottom; // Store vertices for the bottom circle
+	GLfloat theta = 0;
+	GLfloat delta = static_cast<GLfloat>(2.0 * PI / static_cast<GLfloat>(a_nSubdivisions));
+
+	// Generate vertices for the top and bottom circles
+	for (int i = 0; i < a_nSubdivisions; i++)
+	{
+		vector3 tempTop = vector3(cos(theta) * a_fRadius, a_fHeight * 0.5f, sin(theta) * a_fRadius);
+		vector3 tempBottom = vector3(cos(theta) * a_fRadius, -a_fHeight * 0.5f, sin(theta) * a_fRadius);
+		theta += delta;
+		vertexTop.push_back(tempTop);
+		vertexBottom.push_back(tempBottom);
+	}
+
+	// Generate triangles for the top and bottom circles
+	for (int i = 0; i < a_nSubdivisions; i++)
+	{
+		// Top circle
+		AddTri(vector3(0.0f, a_fHeight * 0.5f, 0.0f), vertexTop[(i + 1) % a_nSubdivisions], vertexTop[i]);
+
+		// Bottom circle
+		AddTri(vector3(0.0f, -a_fHeight * 0.5f, 0.0f), vertexBottom[i], vertexBottom[(i + 1) % a_nSubdivisions]);
+	}
+
+	// Generate side walls
+	for (int i = 0; i < a_nSubdivisions; i++)
+	{
+		int nextIndex = (i + 1) % a_nSubdivisions;
+
+		// Side wall triangles
+		AddQuad(vertexTop[i], vertexTop[nextIndex], vertexBottom[i], vertexBottom[nextIndex]);
+	}
+
+
 	// -------------------------------
 
 	// Adding information about color
