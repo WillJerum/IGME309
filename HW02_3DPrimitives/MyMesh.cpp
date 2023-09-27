@@ -241,10 +241,64 @@ void MyMesh::GenerateTorus(float a_fOuterRadius, float a_fInnerRadius, int a_nSu
 	Release();
 	Init();
 
-	// Replace this with your code
-	GenerateCube(a_fOuterRadius * 2.0f, a_v3Color);
-	// -------------------------------
+	
 
+
+	// Replace this with your code
+
+	float deltaTheta = 2.0f * PI / static_cast<float>(a_nSubdivisionsA);
+    float deltaPhi = 2.0f * PI / static_cast<float>(a_nSubdivisionsB);
+
+    // Generate the torus vertices
+    std::vector<std::vector<vector3>> circles;
+
+    for (int i = 0; i < a_nSubdivisionsA; i++)
+	{
+        std::vector<vector3> vertices;
+        for (int j = 0; j < a_nSubdivisionsB; j++) 
+		{
+            float theta = static_cast<float>(i) * deltaTheta;
+            float phi = static_cast<float>(j) * deltaPhi;
+
+            float cosTheta = cos(theta);
+            float sinTheta = sin(theta);
+            float cosPhi = cos(phi);
+            float sinPhi = sin(phi);
+
+            float x = (a_fOuterRadius + a_fInnerRadius * cosPhi) * cosTheta;
+            float y = (a_fOuterRadius + a_fInnerRadius * cosPhi) * sinTheta;
+            float z = a_fInnerRadius * sinPhi;
+
+            vector3 vertex = vector3(x, y, z);
+            vertices.push_back(vertex);
+        }
+        circles.push_back(vertices);
+    }
+
+    // Generate the torus faces (quads)
+    for (int i = 0; i < a_nSubdivisionsA; i++) 
+	{
+        int nextI = (i + 1) % a_nSubdivisionsA;
+        for (int j = 0; j < a_nSubdivisionsB; j++) 
+		{
+            int nextJ = (j + 1) % a_nSubdivisionsB;
+            int current = i * a_nSubdivisionsB + j;
+            int nextA = nextI * a_nSubdivisionsB + j;
+            int nextB = i * a_nSubdivisionsB + nextJ;
+            int nextAB = nextI * a_nSubdivisionsB + nextJ;
+
+            // Add quad using AddQuad method
+            AddQuad
+			(
+                circles[i][j],       
+                circles[nextI][j],   
+                circles[i][nextJ],   
+                circles[nextI][nextJ]
+            );
+        }
+    }
+
+	// -------------------------------
 	// Adding information about color
 	CompleteMesh(a_v3Color);
 	CompileOpenGL3X();
@@ -489,3 +543,4 @@ void MyMesh::GenerateCuboid(vector3 a_v3Dimensions, vector3 a_v3Color)
 	CompleteMesh(a_v3Color);
 	CompileOpenGL3X();
 }
+
