@@ -321,7 +321,48 @@ void MyMesh::GenerateSphere(float a_fRadius, int a_nSubdivisions, vector3 a_v3Co
 	Init();
 
 	// Replace this with your code
-	GenerateCube(a_fRadius * 2.0f, a_v3Color);
+	float deltaTheta = static_cast<float>(2.0 * PI) / a_nSubdivisions;
+	float deltaPhi = static_cast<float>(PI) / a_nSubdivisions;
+
+	std::vector<vector3> vertices;
+	for (int i = 0; i <= a_nSubdivisions; i++)
+	{
+		
+		for (int j = 0; j <= a_nSubdivisions; j++)
+		{
+			// Calculate the spherical coordinates
+			float theta = i * deltaTheta;
+			float phi = j * deltaPhi;
+
+			// Calculate the x, y, and z coordinates of the vertex on the sphere
+			float x = a_fRadius * sin(phi) * cos(theta);
+			float y = a_fRadius * sin(phi) * sin(theta);
+			float z = a_fRadius * cos(phi);
+
+			// Add the vertex to the list
+			vertices.push_back(vector3(x, y, z));
+		}
+	}
+
+	for (int i = 0; i < a_nSubdivisions; i++)
+	{
+		for (int j = 0; j < a_nSubdivisions; j++)
+		{
+			// Calculate the indices of the vertices in the current quad
+			int index0 = i * (a_nSubdivisions + 1) + j;
+			int index1 = index0 + 1;
+			int index2 = (i + 1) * (a_nSubdivisions + 1) + j;
+			int index3 = index2 + 1;
+
+			// Create quads
+			AddQuad(
+				vector3(vertices[index0]),
+				vector3(vertices[index1]),
+				vector3(vertices[index2]),
+				vector3(vertices[index3])
+			);
+		}
+	}
 	// -------------------------------
 
 	// Adding information about color
