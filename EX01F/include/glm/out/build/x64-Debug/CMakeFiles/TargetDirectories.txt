@@ -1,0 +1,3 @@
+C:/Users/predd/source/repos/igme309-2211/include/glm/out/build/x64-Debug/CMakeFiles/glm_dummy.dir
+C:/Users/predd/source/repos/igme309-2211/include/glm/out/build/x64-Debug/CMakeFiles/edit_cache.dir
+C:/Users/predd/source/repos/igme309-2211/include/glm/out/build/x64-Debug/CMakeFiles/rebuild_cache.dir
