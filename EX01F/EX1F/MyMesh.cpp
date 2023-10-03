@@ -36,7 +36,7 @@ void MyMesh::GenerateWave(float a_fCircleRadius, int a_nSubdivisionsCircle, floa
 		vertexRight.push_back(tempRight);
 	}
 
-	// Generate triangles for the top and bottom circles
+	// Generate triangles for the left and right circles
 	for (int i = 0; i < a_nSubdivisionsCircle; i++)
 	{
 		// Left circle
