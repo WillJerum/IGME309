@@ -54,6 +54,10 @@ void MyCamera::CalculateView(void)
 	//		 have change so you only need to focus on the directional and positional 
 	//		 vectors. There is no need to calculate any right click process or connections.
 
+	// Clamp vertical camera movement
+	m_v3PitchYawRoll.x = glm::clamp(m_v3PitchYawRoll.x, -1.56f, 1.56f);
+
+
 	// Create individual quaternions for each rotation
 	glm::quat rotationPitch = glm::angleAxis(m_v3PitchYawRoll.x, glm::vec3(1.0f, 0.0f, 0.0f));
 	glm::quat rotationYaw = glm::angleAxis(m_v3PitchYawRoll.y, glm::vec3(0.0f, 1.0f, 0.0f));
