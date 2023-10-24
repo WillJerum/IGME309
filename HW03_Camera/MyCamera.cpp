@@ -10,6 +10,8 @@ void MyCamera::SetPositionTargetAndUpward(vector3 a_v3Position, vector3 a_v3Targ
 	m_v3Target = a_v3Target;
 	m_v3Upward = a_v3Upward;
 
+	// Vectors are updated in CalculateView()
+
 	//After changing any vectors you need to recalculate the MyCamera View matrix.
 	//While this is executed within the parent call above, when you remove that line
 	//you will still need to call it at the end of this method
