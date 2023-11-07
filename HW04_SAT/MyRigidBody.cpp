@@ -6,8 +6,174 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	//TODO: Calculate the SAT algorithm I STRONGLY suggest you use the
 	//Real Time Collision detection algorithm for OBB here but feel free to
 	//implement your own solution.
+	
+
+
+	// For reference, I will be assigning vertex values as shown in
+	// the figure below.
+	/*
+
+		   F--------G
+		  /|       /|
+		 / |      / |
+		/  |     /  |
+	   A---|----B   |
+	   |   E----|---H
+	   |  /     |  /
+	   |/       | /
+	   C--------D  
+	
+	*/
+
+
+	// Find vertices of first shape
+	// These will be stored in a vector for later
+	std::vector<vector3> vertices;
+	vector3 m_v3minL = GetMinLocal();
+	vector3 m_v3maxL = GetMaxLocal();
+	vector3 m_v3A = vector3(m_v3minL.x, m_v3maxL.y, m_v3maxL.z);
+	vertices.push_back(m_v3A);
+	vector3 m_v3B = vector3(m_v3maxL.x, m_v3maxL.y, m_v3maxL.z);
+	vertices.push_back(m_v3B);
+	vector3 m_v3C = vector3(m_v3minL.x, m_v3minL.y, m_v3maxL.z);
+	vertices.push_back(m_v3C);
+	vector3 m_v3D = vector3(m_v3maxL.x, m_v3minL.y, m_v3maxL.z);
+	vertices.push_back(m_v3D);
+	vector3 m_v3E = vector3(m_v3minL.x, m_v3minL.y, m_v3minL.z);
+	vertices.push_back(m_v3E);
+	vector3 m_v3F = vector3(m_v3minL.x, m_v3maxL.y, m_v3minL.z);
+	vertices.push_back(m_v3F);
+	vector3 m_v3G = vector3(m_v3maxL.x, m_v3maxL.y, m_v3minL.z);
+	vertices.push_back(m_v3G);
+	vector3 m_v3H = vector3(m_v3maxL.x, m_v3minL.y, m_v3minL.z);
+	vertices.push_back(m_v3H);
+
+
+	// Find vertices of second shape
+	// These will be stored in a vector for later
+	std::vector<vector3> otherVertices;
+	vector3 m_v3otherMinL = a_pOther->GetMinLocal();
+	vector3 m_v3otherMaxL = a_pOther->GetMaxLocal();
+	vector3 m_v3otherA = vector3(m_v3otherMinL.x, m_v3otherMaxL.y, m_v3otherMaxL.z);
+	otherVertices.push_back(m_v3otherA);
+	vector3 m_v3otherB = vector3(m_v3otherMaxL.x, m_v3otherMaxL.y, m_v3otherMaxL.z);
+	otherVertices.push_back(m_v3otherB);
+	vector3 m_v3otherC = vector3(m_v3otherMinL.x, m_v3otherMinL.y, m_v3otherMaxL.z);
+	otherVertices.push_back(m_v3otherC);
+	vector3 m_v3otherD = vector3(m_v3otherMaxL.x, m_v3otherMinL.y, m_v3otherMaxL.z);
+	otherVertices.push_back(m_v3otherD);
+	vector3 m_v3otherE = vector3(m_v3otherMinL.x, m_v3otherMinL.y, m_v3otherMinL.z);
+	otherVertices.push_back(m_v3otherE);
+	vector3 m_v3otherF = vector3(m_v3otherMinL.x, m_v3otherMaxL.y, m_v3otherMinL.z);
+	otherVertices.push_back(m_v3otherF);
+	vector3 m_v3otherG = vector3(m_v3otherMaxL.x, m_v3otherMaxL.y, m_v3otherMinL.z);
+	otherVertices.push_back(m_v3otherG);
+	vector3 m_v3otherH = vector3(m_v3otherMaxL.x, m_v3otherMinL.y, m_v3otherMinL.z);
+	otherVertices.push_back(m_v3otherH);
+
+
+
+	// Find face normals
+
+	// Ax Face Normal - AB x AF
+	vector3 m_v3AB = m_v3B - m_v3A;
+	vector3 m_v3AF = m_v3F - m_v3A;
+	vector3 m_v3AxNorm = normalize(cross(m_v3AB, m_v3AF));
+
+	// Ay Face Normal - AC x AF
+	vector3 m_v3AC = m_v3C - m_v3A;
+	vector3 m_v3AyNorm = normalize(cross(m_v3AC, m_v3AF));
+
+	// Az Face Normal - AB x AC
+	vector3 m_v3AzNorm = normalize(cross(m_v3AB, m_v3AC));
+
+	// Bx Face Normal - AB x AF
+	vector3 m_v3otherAB = m_v3otherB - m_v3otherA;
+	vector3 m_v3otherAF = m_v3otherF - m_v3otherA;
+	vector3 m_v3BxNorm = normalize(cross(m_v3otherAB, m_v3otherAF));
+
+	// By Face Normal - AC x AF
+	vector3 m_v3otherAC = m_v3otherC - m_v3otherA;
+	vector3 m_v3ByNorm = normalize(cross(m_v3otherAB, m_v3otherAF));
+
+	// Bz Face Normal - AB x AC
+	vector3 m_v3BzNorm = normalize(cross(m_v3otherAB, m_v3otherAC));
+
+	// Test each possible separation axis for an intersection
+	// Exit early if an axis has no intersection
+
+	// Ax
+	
+	// Ay
+
+	// Az
+
+	// Bx
+
+	// By
+
+	// Bz
+
+	// AxBx
+
+	// AxBy
+
+	// AxBz
+
+	// AyBx
+
+	// AyBy
+
+	// AyBz
+
+	// AzBx
+
+	// AzBy
+
+	// AzBz
+
+
 	return BTXs::eSATResults::SAT_NONE;
+
+
 }
+
+// Helper method for SAT, returns vector2 representing min and
+// max projections respectively
+
+vector2 MyRigidBody::ProjectToAxis(std::vector<vector3> vertices, vector3 axis)
+{
+	float maxDot = -INFINITY;
+	float minDot = INFINITY;
+	for (int i = 0; i < vertices.size(); i++)
+	{
+		float projection = dot(vertices[i], axis);
+
+		if (projection < minDot)
+		{
+			minDot = projection;
+		}
+		if (projection > maxDot)
+		{
+			maxDot = projection;
+		}
+	}
+	return vector2(minDot, maxDot);
+}
+
+bool MyRigidBody::CheckProjectionOverlap(vector2 objectA, vector2 objectB)
+{
+	if (objectA[1] < objectB[0])
+	{
+		return false;
+	}
+	if (objectB[1] < objectA[0])
+	{
+		return false;
+	}
+	return true;
+}
+
 bool MyRigidBody::IsColliding(MyRigidBody* const a_pOther)
 {
 	//check if spheres are colliding
