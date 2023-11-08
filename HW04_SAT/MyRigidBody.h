@@ -248,18 +248,6 @@ private:
 	OUTPUT: 0 for colliding, all other first axis that succeeds test
 	*/
 	uint SAT(MyRigidBody* const a_pOther);
-	/*
-	USAGE: This is a helper method for SAT that projects the vertices onto the axis
-	ARGUMENTS: vertices -> vertices to project, axis -> axis to project onto
-	OUTPUT: vector2 representing the minimum and maximum projections respectively
-	*/
-	vector2 MyRigidBody::ProjectToAxis(std::vector<vector3> vertices, vector3 axis);
-	/*
-	USAGE: This is a helper method for SAT that checks for overlap on the axis
-	ARGUMENTS: objectA/B -> minimum and maximum projected values for the object
-	OUTPUT: bool representing whether there is overlap
-	*/
-	bool MyRigidBody::CheckProjectionOverlap(vector2 objectA, vector2 objectB);
 };//class
 
 } //namespace BTX

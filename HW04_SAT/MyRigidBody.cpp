@@ -6,173 +6,118 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	//TODO: Calculate the SAT algorithm I STRONGLY suggest you use the
 	//Real Time Collision detection algorithm for OBB here but feel free to
 	//implement your own solution.
-	
+
+	// Find the local axes for each model
+
+	SetVisibleOBB(true);
+
+	std::vector<vector3> localAxes;
+
+	localAxes.push_back(glm::vec3(GetModelMatrix()[0][0],
+		GetModelMatrix()[0][1], GetModelMatrix()[0][2]));
+	localAxes.push_back(glm::vec3(GetModelMatrix()[1][0],
+		GetModelMatrix()[1][1], GetModelMatrix()[1][2]));
+	localAxes.push_back(glm::vec3(GetModelMatrix()[2][0],
+		GetModelMatrix()[2][1], GetModelMatrix()[2][2]));
 
 
-	// For reference, I will be assigning vertex values as shown in
-	// the figure below.
-	/*
+	std::vector<vector3> otherLocalAxes;
 
-		   F--------G
-		  /|       /|
-		 / |      / |
-		/  |     /  |
-	   A---|----B   |
-	   |   E----|---H
-	   |  /     |  /
-	   |/       | /
-	   C--------D  
-	
-	*/
+	otherLocalAxes.push_back(glm::vec3(a_pOther->GetModelMatrix()[0][0],
+		a_pOther->GetModelMatrix()[0][1], a_pOther->GetModelMatrix()[0][2]));
+	otherLocalAxes.push_back(glm::vec3(a_pOther->GetModelMatrix()[1][0],
+		a_pOther->GetModelMatrix()[1][1], a_pOther->GetModelMatrix()[1][2]));
+	otherLocalAxes.push_back(glm::vec3(a_pOther->GetModelMatrix()[2][0],
+		a_pOther->GetModelMatrix()[2][1], a_pOther->GetModelMatrix()[2][2]));
 
+	// Find the edges of each model
 
-	// Find vertices of first shape
-	// These will be stored in a vector for later
-	std::vector<vector3> vertices;
-	vector3 m_v3minL = GetMinLocal();
-	vector3 m_v3maxL = GetMaxLocal();
-	vector3 m_v3A = vector3(m_v3minL.x, m_v3maxL.y, m_v3maxL.z);
-	vertices.push_back(m_v3A);
-	vector3 m_v3B = vector3(m_v3maxL.x, m_v3maxL.y, m_v3maxL.z);
-	vertices.push_back(m_v3B);
-	vector3 m_v3C = vector3(m_v3minL.x, m_v3minL.y, m_v3maxL.z);
-	vertices.push_back(m_v3C);
-	vector3 m_v3D = vector3(m_v3maxL.x, m_v3minL.y, m_v3maxL.z);
-	vertices.push_back(m_v3D);
-	vector3 m_v3E = vector3(m_v3minL.x, m_v3minL.y, m_v3minL.z);
-	vertices.push_back(m_v3E);
-	vector3 m_v3F = vector3(m_v3minL.x, m_v3maxL.y, m_v3minL.z);
-	vertices.push_back(m_v3F);
-	vector3 m_v3G = vector3(m_v3maxL.x, m_v3maxL.y, m_v3minL.z);
-	vertices.push_back(m_v3G);
-	vector3 m_v3H = vector3(m_v3maxL.x, m_v3minL.y, m_v3minL.z);
-	vertices.push_back(m_v3H);
+	std::vector<float> edges;
+	edges.push_back(abs(GetHalfWidth().x));
+	edges.push_back(abs(GetHalfWidth().y));
+	edges.push_back(abs(GetHalfWidth().z));
+
+	std::vector<float> otherEdges;
+	otherEdges.push_back(abs(a_pOther->GetHalfWidth().x));
+	otherEdges.push_back(abs(a_pOther->GetHalfWidth().y));
+	otherEdges.push_back(abs(a_pOther->GetHalfWidth().z));
 
 
-	// Find vertices of second shape
-	// These will be stored in a vector for later
-	std::vector<vector3> otherVertices;
-	vector3 m_v3otherMinL = a_pOther->GetMinLocal();
-	vector3 m_v3otherMaxL = a_pOther->GetMaxLocal();
-	vector3 m_v3otherA = vector3(m_v3otherMinL.x, m_v3otherMaxL.y, m_v3otherMaxL.z);
-	otherVertices.push_back(m_v3otherA);
-	vector3 m_v3otherB = vector3(m_v3otherMaxL.x, m_v3otherMaxL.y, m_v3otherMaxL.z);
-	otherVertices.push_back(m_v3otherB);
-	vector3 m_v3otherC = vector3(m_v3otherMinL.x, m_v3otherMinL.y, m_v3otherMaxL.z);
-	otherVertices.push_back(m_v3otherC);
-	vector3 m_v3otherD = vector3(m_v3otherMaxL.x, m_v3otherMinL.y, m_v3otherMaxL.z);
-	otherVertices.push_back(m_v3otherD);
-	vector3 m_v3otherE = vector3(m_v3otherMinL.x, m_v3otherMinL.y, m_v3otherMinL.z);
-	otherVertices.push_back(m_v3otherE);
-	vector3 m_v3otherF = vector3(m_v3otherMinL.x, m_v3otherMaxL.y, m_v3otherMinL.z);
-	otherVertices.push_back(m_v3otherF);
-	vector3 m_v3otherG = vector3(m_v3otherMaxL.x, m_v3otherMaxL.y, m_v3otherMinL.z);
-	otherVertices.push_back(m_v3otherG);
-	vector3 m_v3otherH = vector3(m_v3otherMaxL.x, m_v3otherMinL.y, m_v3otherMinL.z);
-	otherVertices.push_back(m_v3otherH);
+	float ra, rb;
+	matrix3 R, AbsR;
 
-
-
-	// Find face normals
-
-	// Ax Face Normal - AB x AF
-	vector3 m_v3AB = m_v3B - m_v3A;
-	vector3 m_v3AF = m_v3F - m_v3A;
-	vector3 m_v3AxNorm = normalize(cross(m_v3AB, m_v3AF));
-
-	// Ay Face Normal - AC x AF
-	vector3 m_v3AC = m_v3C - m_v3A;
-	vector3 m_v3AyNorm = normalize(cross(m_v3AC, m_v3AF));
-
-	// Az Face Normal - AB x AC
-	vector3 m_v3AzNorm = normalize(cross(m_v3AB, m_v3AC));
-
-	// Bx Face Normal - AB x AF
-	vector3 m_v3otherAB = m_v3otherB - m_v3otherA;
-	vector3 m_v3otherAF = m_v3otherF - m_v3otherA;
-	vector3 m_v3BxNorm = normalize(cross(m_v3otherAB, m_v3otherAF));
-
-	// By Face Normal - AC x AF
-	vector3 m_v3otherAC = m_v3otherC - m_v3otherA;
-	vector3 m_v3ByNorm = normalize(cross(m_v3otherAB, m_v3otherAF));
-
-	// Bz Face Normal - AB x AC
-	vector3 m_v3BzNorm = normalize(cross(m_v3otherAB, m_v3otherAC));
-
-	// Test each possible separation axis for an intersection
-	// Exit early if an axis has no intersection
-
-	// Ax
-	
-	// Ay
-
-	// Az
-
-	// Bx
-
-	// By
-
-	// Bz
-
-	// AxBx
-
-	// AxBy
-
-	// AxBz
-
-	// AyBx
-
-	// AyBy
-
-	// AyBz
-
-	// AzBx
-
-	// AzBy
-
-	// AzBz
-
-
-	return BTXs::eSATResults::SAT_NONE;
-
-
-}
-
-// Helper method for SAT, returns vector2 representing min and
-// max projections respectively
-
-vector2 MyRigidBody::ProjectToAxis(std::vector<vector3> vertices, vector3 axis)
-{
-	float maxDot = -INFINITY;
-	float minDot = INFINITY;
-	for (int i = 0; i < vertices.size(); i++)
+	// Compute rotation matrix expressing b in aÅfs coordinate frame
+	for (int i = 0; i < 3; i++)
 	{
-		float projection = dot(vertices[i], axis);
-
-		if (projection < minDot)
+		for (int j = 0; j < 3; j++)
 		{
-			minDot = projection;
-		}
-		if (projection > maxDot)
-		{
-			maxDot = projection;
+			R[i][j] = dot(localAxes[i], otherLocalAxes[j]);
 		}
 	}
-	return vector2(minDot, maxDot);
+
+	// Compute translation vector t
+	vector3 t = a_pOther->GetCenterGlobal() - GetCenterGlobal();
+	// Bring translation into aÅfs coordinate frame
+	t = vector3(dot(t, localAxes[0]), dot(t, localAxes[1]), dot(t, localAxes[2]));
+	// Compute common subexpressions. Add in an epsilon term to
+	// counteract arithmetic errors when two edges are parallel and
+	// their cross product is (near) null (see text for details)
+	for (int i = 0; i < 3; i++)
+		for (int j = 0; j < 3; j++)
+			AbsR[i][j] = abs(R[i][j]) + std::numeric_limits<float>::epsilon();
+	// Test axes L = A0, L = A1, L = A2
+	for (int i = 0; i < 3; i++) {
+		ra = edges[i];
+		rb = otherEdges[0] * AbsR[i][0] + otherEdges[1] * AbsR[i][1] + otherEdges[2] * AbsR[i][2];
+		if (abs(t[i]) > ra + rb) return 1;
+	}
+	// Test axes L = B0, L = B1, L = B2
+	for (int i = 0; i < 3; i++) {
+		ra = edges[0] * AbsR[0][i] + edges[1] * AbsR[1][i] + edges[2] * AbsR[2][i];
+		rb = otherEdges[i];
+		if (abs(t[0] * R[0][i] + t[1] * R[1][i] + t[2] * R[2][i]) > ra + rb) return 2;
+	}
+	// Test axis L = A0 x B0
+	ra = edges[1] * AbsR[2][0] + edges[2] * AbsR[1][0];
+	rb = otherEdges[1] * AbsR[0][2] + otherEdges[2] * AbsR[0][1];
+	if (abs(t[2] * R[1][0] - t[1] * R[2][0]) > ra + rb) return 3;
+	// Test axis L = A0 x B1
+	ra = edges[1] * AbsR[2][1] + edges[2] * AbsR[1][1];
+	rb = otherEdges[0] * AbsR[0][2] + otherEdges[2] * AbsR[0][0];
+	if (abs(t[2] * R[1][1] - t[1] * R[2][1]) > ra + rb) return 4;
+	// Test axis L = A0 x B2
+	ra = edges[1] * AbsR[2][2] + edges[2] * AbsR[1][2];
+	rb = otherEdges[0] * AbsR[0][1] + otherEdges[1] * AbsR[0][0];
+	if (abs(t[2] * R[1][2] - t[1] * R[2][2]) > ra + rb) return 5;
+	// Test axis L = A1 x B0
+	ra = edges[0] * AbsR[2][0] + edges[2] * AbsR[0][0];
+	rb = otherEdges[1] * AbsR[1][2] + otherEdges[2] * AbsR[1][1];
+	if (abs(t[0] * R[2][0] - t[2] * R[0][0]) > ra + rb) return 6;
+	// Test axis L = A1 x B1
+	ra = edges[0] * AbsR[2][1] + edges[2] * AbsR[0][1];
+	rb = otherEdges[0] * AbsR[1][2] + otherEdges[2] * AbsR[1][0];
+	if (abs(t[0] * R[2][1] - t[2] * R[0][1]) > ra + rb) return 7;
+	// Test axis L = A1 x B2
+	ra = edges[0] * AbsR[2][2] + edges[2] * AbsR[0][2];
+	rb = otherEdges[0] * AbsR[1][1] + otherEdges[1] * AbsR[1][0];
+	if (abs(t[0] * R[2][2] - t[2] * R[0][2]) > ra + rb) return 8;
+	// Test axis L = A2 x B0
+	ra = edges[0] * AbsR[1][0] + edges[1] * AbsR[0][0];
+	rb = otherEdges[1] * AbsR[2][2] + otherEdges[2] * AbsR[2][1];
+	if (abs(t[1] * R[0][0] - t[0] * R[1][0]) > ra + rb) return 9;
+	// Test axis L = A2 x B1
+	ra = edges[0] * AbsR[1][1] + edges[1] * AbsR[0][1];
+	rb = otherEdges[0] * AbsR[2][2] + otherEdges[2] * AbsR[2][0];
+	if (abs(t[1] * R[0][1] - t[0] * R[1][1]) > ra + rb) return 10;
+	// Test axis L = A2 x B2
+	ra = edges[0] * AbsR[1][2] + edges[1] * AbsR[0][2];
+	rb = otherEdges[0] * AbsR[2][1] + otherEdges[1] * AbsR[2][0];
+	if (abs(t[1] * R[0][2] - t[0] * R[1][2]) > ra + rb) return 11;
+	// Since no separating axis is found, the OBBs must be intersecting
+	return 0;
 }
 
-bool MyRigidBody::CheckProjectionOverlap(vector2 objectA, vector2 objectB)
-{
-	if (objectA[1] < objectB[0])
-	{
-		return false;
-	}
-	if (objectB[1] < objectA[0])
-	{
-		return false;
-	}
-	return true;
-}
+
 
 bool MyRigidBody::IsColliding(MyRigidBody* const a_pOther)
 {
@@ -187,15 +132,17 @@ bool MyRigidBody::IsColliding(MyRigidBody* const a_pOther)
 	{
 		uint nResult = SAT(a_pOther);
 
-		if (bColliding) //The SAT shown they are colliding
+		if (nResult == 0) //The SAT shown they are colliding
 		{
 			this->AddCollisionWith(a_pOther);
 			a_pOther->AddCollisionWith(this);
+			return true;
 		}
 		else //they are not colliding
 		{
 			this->RemoveCollisionWith(a_pOther);
 			a_pOther->RemoveCollisionWith(this);
+			return false;
 		}
 	}
 	else //they are not colliding with bounding sphere
@@ -275,7 +222,7 @@ void MyRigidBody::SetColorNotColliding(vector3 a_v3Color) { m_v3ColorNotCollidin
 vector3 MyRigidBody::GetCenterLocal(void) { return m_v3Center; }
 vector3 MyRigidBody::GetMinLocal(void) { return m_v3MinL; }
 vector3 MyRigidBody::GetMaxLocal(void) { return m_v3MaxL; }
-vector3 MyRigidBody::GetCenterGlobal(void){	return vector3(m_m4ToWorld * vector4(m_v3Center, 1.0f)); }
+vector3 MyRigidBody::GetCenterGlobal(void) { return vector3(m_m4ToWorld * vector4(m_v3Center, 1.0f)); }
 vector3 MyRigidBody::GetMinGlobal(void) { return m_v3MinG; }
 vector3 MyRigidBody::GetMaxGlobal(void) { return m_v3MaxG; }
 vector3 MyRigidBody::GetHalfWidth(void) { return m_v3HalfWidth; }
