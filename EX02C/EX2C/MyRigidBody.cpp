@@ -8,6 +8,76 @@ vector3 MyRigidBody::Globalize(vector3 a_v3Input)
 }
 #pragma endregion
 
+vector3 MyRigidBody::FindMax(std::vector<vector3> a_pointList)
+{
+	float f_xMax = a_pointList[0].x;
+	float f_yMax = a_pointList[0].y;
+	float f_zMax = a_pointList[0].z;
+	int i_verts = a_pointList.size();
+
+	for (int i = 0; i < i_verts; i++)
+	{
+		if (a_pointList[i].x > f_xMax)
+		{
+			f_xMax = a_pointList[i].x;
+		}
+		if (a_pointList[i].y > f_yMax)
+		{
+			f_yMax = a_pointList[i].y;
+		}
+		if (a_pointList[i].z > f_zMax)
+		{
+			f_zMax = a_pointList[i].z;
+		}
+	}
+	return vector3(f_xMax, f_yMax, f_zMax);
+}
+
+vector3 MyRigidBody::FindMin(std::vector<vector3> a_pointList)
+{
+	float f_xMin = a_pointList[0].x;
+	float f_yMin = a_pointList[0].y;
+	float f_zMin = a_pointList[0].z;
+	int i_verts = a_pointList.size();
+
+	for (int i = 0; i < i_verts; i++)
+	{
+		if (a_pointList[i].x < f_xMin)
+		{
+			f_xMin = a_pointList[i].x;
+		}
+		if (a_pointList[i].y < f_yMin)
+		{
+			f_yMin = a_pointList[i].y;
+		}
+		if (a_pointList[i].z < f_zMin)
+		{
+			f_zMin = a_pointList[i].z;
+		}
+	}
+	return vector3(f_xMin, f_yMin, f_zMin);
+}
+
+// Didn't end up using this function
+vector3 MyRigidBody::FindCenter(std::vector<vector3> a_pointList)
+{
+	float sum_x = 0.0f;
+	float sum_y = 0.0f;
+	float sum_z = 0.0f;
+	int i_verts = a_pointList.size();
+
+	for (int i = 0; i < i_verts; i++)
+	{
+		sum_x += a_pointList[i].x;
+		sum_y += a_pointList[i].y;
+		sum_z += a_pointList[i].z;
+	}
+
+	return vector3(sum_x / i_verts,
+		sum_y / i_verts,
+		sum_z / i_verts);
+}
+
 void MyRigidBody::Update(void)
 {
 #pragma region DO NOT CHANGE
@@ -16,7 +86,7 @@ void MyRigidBody::Update(void)
 #pragma endregion
 
 	//Update the m_v3Direction of the arrow, this is the global Y axis oriented by qDirection (as you did Forward in camera assigment)
-	m_v3Direction = AXIS_Y;
+	m_v3Direction = glm::normalize(glm::rotate(qDirection,AXIS_Y));
 }
 //Allocation
 MyRigidBody::MyRigidBody(std::vector<vector3> a_pointList)
@@ -32,11 +102,13 @@ MyRigidBody::MyRigidBody(std::vector<vector3> a_pointList)
 #pragma endregion
 
 	//replace the following with your code
-	m_v3MaxG = m_v3MaxL = vector3(4.0f);
-	m_v3MinG = m_v3MinL = vector3(0.0f);
-	m_v3Center = vector3(2.0f);
-	m_v3HalfWidth = vector3(2.0f);
-	m_fRadius = 2.5f;
+	m_v3MaxG = m_v3MaxL = FindMax(a_pointList);
+	m_v3MaxG = Globalize(m_v3MaxL);
+	m_v3MinG = m_v3MinL = FindMin(a_pointList);
+	m_v3MinG = Globalize(m_v3MinL);
+	m_v3Center = (m_v3MaxL + m_v3MinL) / 2.0f;
+	m_v3HalfWidth = (m_v3MaxL - m_v3MinL) / 2.0f;
+	m_fRadius = glm::distance(m_v3Center, m_v3MaxL);
 }
 void MyRigidBody::SetModelMatrix(matrix4 a_m4ModelMatrix)
 {
@@ -50,12 +122,81 @@ void MyRigidBody::SetModelMatrix(matrix4 a_m4ModelMatrix)
 #pragma endregion
 
 	//Add your code
+	
+	// Find corners of the cube
+	vector3 vertices[8];
+	vertices[0] = vector3(m_v3MinL.x, m_v3MinL.y, m_v3MinL.z); // left bottom back
+	vertices[1] = vector3(m_v3MaxL.x, m_v3MinL.y, m_v3MinL.z); // right bottom back
+	vertices[2] = vector3(m_v3MinL.x, m_v3MaxL.y, m_v3MinL.z); // left top back
+	vertices[3] = vector3(m_v3MaxL.x, m_v3MaxL.y, m_v3MinL.z); // right top back
+	vertices[4] = vector3(m_v3MinL.x, m_v3MinL.y, m_v3MaxL.z); // left bottom front
+	vertices[5] = vector3(m_v3MaxL.x, m_v3MinL.y, m_v3MaxL.z); // right bottom front
+	vertices[6] = vector3(m_v3MinL.x, m_v3MaxL.y, m_v3MaxL.z); // left top front
+	vertices[7] = vector3(m_v3MaxL.x, m_v3MaxL.y, m_v3MaxL.z); // right top front
+
+	// Convert to global space
+	for (int i = 0; i < 8; i++)
+	{
+		vertices[i] = Globalize(vertices[i]);
+	}
+
+	// Set the first corner to max and min
+	m_v3MaxG = m_v3MinG = vertices[0];
+
+	// Find new global max and min
+	for (int i = 1; i < 8; ++i)
+	{
+		if (m_v3MaxG.x < vertices[i].x)
+		{
+			m_v3MaxG.x = vertices[i].x;
+		}
+		else if (m_v3MinG.x > vertices[i].x)
+		{
+			m_v3MinG.x = vertices[i].x;
+		}
+
+		if (m_v3MaxG.y < vertices[i].y)
+		{
+			m_v3MaxG.y = vertices[i].y;
+		}
+		else if (m_v3MinG.y > vertices[i].y) 
+		{ 
+			m_v3MinG.y = vertices[i].y; 
+		}
+
+		if (m_v3MaxG.z < vertices[i].z)
+		{
+			m_v3MaxG.z = vertices[i].z;
+		}
+		else if (m_v3MinG.z > vertices[i].z)
+		{
+			m_v3MinG.z = vertices[i].z;
+		}
+	}
+
 	m_v3ARBBSize = m_v3MaxG - m_v3MinG; 
 }
 bool MyRigidBody::TestARBB(MyRigidBody* const other)
 {
+	// Check for separating axis on x
+	if (m_v3MaxG.x < other->GetMinGlobal().x || m_v3MinG.x > other->GetMaxGlobal().x)
+	{
+		return false;
+	}
+	// Check for separating axis on y
+	if (m_v3MaxG.y < other->GetMinGlobal().y || m_v3MinG.y > other->GetMaxGlobal().y)
+	{
+		return false;
+	}
+	// Check for separating axis on z
+	if (m_v3MaxG.z < other->GetMinGlobal().z || m_v3MinG.z > other->GetMaxGlobal().z)
+	{
+		return false;
+	}
+	// No separating axis found, must be colliding
 	return true;
 }
+
 #pragma region DO NOT CHANGE
 bool MyRigidBody::IsColliding(MyRigidBody* const other)
 {

@@ -1,6 +1,6 @@
 /*----------------------------------------------
-Programmer: Alberto Bobadilla (labigm@gmail.com)
-Date: 2021/06
+Programmer: Will Jerum (wrj2313@rit.edu)
+Date: 2023/11
 ----------------------------------------------*/
 #ifndef __MYRIGIDBODY_H_
 #define __MYRIGIDBODY_H_
@@ -119,6 +119,35 @@ public:
 	OUTPUT: are they colliding?
 	*/
 	bool IsColliding(MyRigidBody* const other);
+
+	/*
+	USAGE: Finds maximum XYZ values in a list of points
+	ARGUMENTS: vector<vector3> a_pointList -> list of points
+	OUTPUT: Vector3 containing maximum XYZ values
+	*/
+	vector3 MyRigidBody::FindMax(std::vector<vector3> a_pointList);
+
+	/*
+	USAGE: Finds minimum XYZ values in a list of points
+	ARGUMENTS: vector<vector3> a_pointList -> list of points
+	OUTPUT: Vector3 containing minimum XYZ values
+	*/
+	vector3 MyRigidBody::FindMin(std::vector<vector3> a_pointList);
+
+	/*
+	USAGE: Finds center of an object given a list of points
+	ARGUMENTS: vector<vector3> a_pointList -> list of points
+	OUTPUT: Vector3 representing center point
+	*/
+	vector3 MyRigidBody::FindCenter(std::vector<vector3> a_pointList);
+
+	/*
+	USAGE: Finds half width of an object given minimim and
+	maximum XYZ values in local space
+	ARGUMENTS: vector3 m_v3MinL -> Minimum XYZ
+	OUTPUT: Vector3 representing center point
+	*/
+	vector3 MyRigidBody::FindHalfWidth(vector3 m_v3MinL, vector3 m_v3MaxL);
 #pragma region Accessors
 	/*
 	Usage: Gets visibility of bounding sphere
