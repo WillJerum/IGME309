@@ -27,8 +27,7 @@ Octant::Octant(uint a_nMaxLevel, uint a_nIdealEntityCount)
 	//The following measures all object boxes in the world
 
 	std::vector<vector3> lMinMax;
-	int entities = m_pEntityMngr->GetEntityCount();
-	for (int i = 0; i < entities; i++)
+	for (int i = 0; i < m_pEntityMngr->GetEntityCount(); i++)
 	{
 		Entity* thisEntity = m_pEntityMngr->GetEntity(i);
 		RigidBody* thisRigidBody = thisEntity->GetRigidBody();
@@ -149,7 +148,6 @@ void Octant::Subdivide(void)
 	m_uChildren = 8;
 
 	float size = m_fSize / 4.0f;
-	float size2 = size * 2.0f;
 	vector3 center = m_v3Center;
 
 	// Bottom
@@ -157,36 +155,36 @@ void Octant::Subdivide(void)
 	center.x -= size;
 	center.y -= size;
 	center.z -= size;
-	m_pChild[0] = new Octant(center, size2); 
+	m_pChild[0] = new Octant(center, size * 2.0f); 
 
 	// Back Right
-	center.x += (size2);
-	m_pChild[1] = new Octant(center, size2); 
+	center.x += (size * 2.0f);
+	m_pChild[1] = new Octant(center, size * 2.0f); 
 
 	// Front Right
-	center.z += (size2); 
-	m_pChild[2] = new Octant(center, size2); 
+	center.z += (size * 2.0f); 
+	m_pChild[2] = new Octant(center, size * 2.0f); 
 
 	// Front Left
-	center.x -= (size2); 
-	m_pChild[3] = new Octant(center, size2); 
+	center.x -= (size * 2.0f); 
+	m_pChild[3] = new Octant(center, size * 2.0f); 
 
 	// Top
 	// Front Left
-	center.y += (size2); 
-	m_pChild[4] = new Octant(center, size2); 
+	center.y += (size * 2.0f); 
+	m_pChild[4] = new Octant(center, size * 2.0f); 
 
 	// Back Left
-	center.z -= (size2);
-	m_pChild[5] = new Octant(center, size2);
+	center.z -= (size * 2.0f);
+	m_pChild[5] = new Octant(center, size * 2.0f);
 
 	// Back Right
-	center.x += (size2);
-	m_pChild[6] = new Octant(center, size2);
+	center.x += (size * 2.0f);
+	m_pChild[6] = new Octant(center, size * 2.0f);
 
 	// Front Right
-	center.z += (size2);
-	m_pChild[7] = new Octant(center, size2);
+	center.z += (size * 2.0f);
+	m_pChild[7] = new Octant(center, size * 2.0f);
 
 	for (int i = 0; i < 8; i++)
 	{
@@ -205,8 +203,7 @@ bool Octant::ContainsAtLeast(uint a_nEntities)
 {
 	//You need to check how many entity objects live within this octant
 	int count = 0;
-	int entities = m_pEntityMngr->GetEntityCount();
-	for (int i = 0; i < entities; i++)
+	for (int i = 0; i < m_pEntityMngr->GetEntityCount(); i++)
 	{
 		if (IsColliding(i))
 		{
@@ -233,8 +230,7 @@ void Octant::AssignIDtoEntity(void)
 	// When a leaf is found
 	if (m_uChildren == 0)
 	{
-		int entities = m_pEntityMngr->GetEntityCount();
-		for (int i = 0; i < entities; i++)
+		for (int i = 0; i < m_pEntityMngr->GetEntityCount(); i++)
 		{
 			if (IsColliding(i))
 			{
