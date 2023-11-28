@@ -39,7 +39,7 @@ Octant::Octant(uint a_nMaxLevel, uint a_nIdealEntityCount)
 
 	vector3 halfWidth = pRigidBody->GetHalfWidth();
 	float max = halfWidth.x;
-	for (int i = 0; i < 2; i++)
+	for (int i = 1; i < 3; i++)
 	{
 		if (max < halfWidth[i])
 		{
@@ -144,43 +144,43 @@ void Octant::Subdivide(void)
 	center.x -= size;
 	center.y -= size;
 	center.z -= size;
-	m_pChild[0] = new Octant(center, size / 2.0f);
+	m_pChild[0] = new Octant(center, size * 2.0f);
 
 	// Back Right
-	center.x += (size / 2.0f);
-	m_pChild[1] = new Octant(center, size / 2.0f);
+	center.x += (size * 2.0f);
+	m_pChild[1] = new Octant(center, size * 2.0f);
 
 	// Front Right
-	center.z += (size / 2.0f);
-	m_pChild[2] = new Octant(center, size / 2.0f);
+	center.z += (size * 2.0f);
+	m_pChild[2] = new Octant(center, size * 2.0f);
 
 	// Front Left
-	center.x -= (size / 2.0f);
-	m_pChild[3] = new Octant(center, size / 2.0f);
+	center.x -= (size * 2.0f);
+	m_pChild[3] = new Octant(center, size * 2.0f);
 
 	// Top
 	// Front Left
-	center.y += (size / 2.0f);
-	m_pChild[4] = new Octant(center, size / 2.0f);
+	center.y += (size * 2.0f);
+	m_pChild[4] = new Octant(center, size * 2.0f);
 
 	// Back Left
-	center.z -= (size / 2.0f);
-	m_pChild[5] = new Octant(center, size / 2.0f);
+	center.z -= (size * 2.0f);
+	m_pChild[5] = new Octant(center, size * 2.0f);
 
 	// Back Right
-	center.x += (size / 2.0f);
-	m_pChild[6] = new Octant(center, size / 2.0f);
+	center.x += (size * 2.0f);
+	m_pChild[6] = new Octant(center, size * 2.0f);
 
 	// Front Right
-	center.z += (size / 2.0f);
-	m_pChild[7] = new Octant(center, size / 2.0f);
+	center.z += (size * 2.0f);
+	m_pChild[7] = new Octant(center, size * 2.0f);
 
 	for (int i = 0; i < 8; i++)
 	{
 		// Connect leaves to tree
 		m_pChild[i]->m_pRoot = m_pRoot;
 		m_pChild[i]->m_pParent = this;
-		m_pChild[i]->m_uLevel = m_uLevel++;
+		m_pChild[i]->m_uLevel = m_uLevel + 1;
 		// Subdivide again if necessary
 		if (m_pChild[i]->ContainsAtLeast(m_uIdealEntityCount))
 		{
@@ -191,14 +191,43 @@ void Octant::Subdivide(void)
 bool Octant::ContainsAtLeast(uint a_nEntities)
 {
 	//You need to check how many entity objects live within this octant
-	return false; //return something for the sake of start up code
+	int count = 0;
+	for (int i = 0; i < m_pEntityMngr->GetEntityCount(); i++)
+	{
+		if (IsColliding(i))
+		{
+			count++;
+		}
+		if (count > a_nEntities)
+		{
+			return true;
+		}
+	}
+	return false;
 }
 void Octant::AssignIDtoEntity(void)
 {
 	//Recursive method
 	//Have to traverse the tree and make sure to tell the entity manager
 	//what octant (space) each object is at
-	m_pEntityMngr->AddDimension(0, m_uID);//example only, take the first entity and tell it its on this space
+	
+	// Find a leaf
+	for (int i = 0; i < m_uChildren; i++)
+	{
+		m_pChild[i]->AssignIDtoEntity();
+	}
+	// When a leaf is found
+	if (m_uChildren == 0)
+	{
+		for (int i = 0; i < m_pEntityMngr->GetEntityCount(); i++)
+		{
+			if (IsColliding(i))
+			{
+				m_EntityList.push_back(i);
+				m_pEntityMngr->AddDimension(i, m_uID);
+			}
+		}
+	}
 }
 //-------------------------------------------------------------------------------------------------------------------
 // You can assume the following is fine and does not need changes, you may add onto it but the code is fine as is
