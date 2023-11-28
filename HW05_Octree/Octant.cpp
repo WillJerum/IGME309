@@ -24,20 +24,40 @@ Octant::Octant(uint a_nMaxLevel, uint a_nIdealEntityCount)
 	//want in it, remember each subdivision will create 8 children for this octant but not all children
 	//of those children will have children of their own
 
-	//The following is a made-up size, you need to make sure it is measuring all the object boxes in the world
+	//The following measures all object boxes in the world
+
 	std::vector<vector3> lMinMax;
-	lMinMax.push_back(vector3(-50.0f));
-	lMinMax.push_back(vector3(25.0f));
-	RigidBody pRigidBody = RigidBody(lMinMax);
 
+	for (int i = 0; i < m_pEntityMngr->GetEntityCount(); i++)
+	{
+		Entity* thisEntity = m_pEntityMngr->GetEntity(i);
+		RigidBody* thisRigidBody = thisEntity->GetRigidBody();
+		lMinMax.push_back(thisRigidBody->GetMinGlobal());
+		lMinMax.push_back(thisRigidBody->GetMaxGlobal());
+	}
+	RigidBody* pRigidBody = new RigidBody(lMinMax);
 
-	//The following will set up the values of the octant, make sure the are right, the rigid body at start
-	//is NOT fine, it has made-up values
-	m_fSize = pRigidBody.GetHalfWidth().x * 2.0f;
-	m_v3Center = pRigidBody.GetCenterLocal();
-	m_v3Min = m_v3Center - pRigidBody.GetHalfWidth();
-	m_v3Max = m_v3Center + pRigidBody.GetHalfWidth();
+	vector3 halfWidth = pRigidBody->GetHalfWidth();
+	float max = halfWidth.x;
+	for (int i = 0; i < 2; i++)
+	{
+		if (max < halfWidth[i])
+		{
+			max = halfWidth[i];
+		}
+	}
+	
+	vector3 center = pRigidBody->GetCenterLocal();
+	lMinMax.clear();
+	SafeDelete(pRigidBody);
 
+	//The following will set up the values of the octant
+	
+	m_fSize = max * 2.0f;
+	m_v3Center = center;
+	m_v3Min = center - (vector3(max));
+	m_v3Max = center + (vector3(max));
+	
 	m_uOctantCount++; //When we add an octant we increment the count
 	ConstructTree(m_uMaxLevel); //Construct the children
 }
@@ -45,19 +65,61 @@ Octant::Octant(uint a_nMaxLevel, uint a_nIdealEntityCount)
 bool Octant::IsColliding(uint a_uRBIndex)
 {
 	//Get how many objects there are in the world
+	int objectCount = m_pEntityMngr->GetEntityCount();
+
 	//If the index given is larger than the number of elements in the bounding object there is no collision
+	if (a_uRBIndex >= objectCount)
+	{
+		return false;
+	}
 	//As the Octree will never rotate or scale this collision is as easy as an Axis Alligned Bounding Box
 	//Get all vectors in global space (the octant ones are already in Global)
-	return true; // for the sake of startup code
+	Entity* entity = m_pEntityMngr->GetEntity(a_uRBIndex);
+	RigidBody* rigidBody = entity->GetRigidBody();
+	vector3 minOther = rigidBody->GetMinGlobal();
+	vector3 maxOther = rigidBody->GetMaxGlobal();
+
+	// Check for collision on X
+	if ((m_v3Max.x < minOther.x) || (m_v3Min.x > maxOther.x))
+	{
+		return false;
+	}
+	// Check for collision on Y
+	if ((m_v3Max.y < minOther.y) || (m_v3Min.y > maxOther.y))
+	{
+		return false;
+	}
+	// Check for collision on Z
+	if ((m_v3Max.z < minOther.z) || (m_v3Min.z > maxOther.z))
+	{
+		return false;
+	}
+
+	return true;
 }
 void Octant::Display(uint a_nIndex, vector3 a_v3Color)
 {
 	// Display the specified octant
+	if (m_uID == a_nIndex)
+	{
+		m_pModelMngr->AddWireCubeToRenderList(glm::translate(IDENTITY_M4, m_v3Center) *
+			glm::scale(vector3(m_fSize)), a_v3Color);
+		return;
+	}
+	for (int i = 0; i < m_uChildren; i++)
+	{
+		m_pChild[i]->Display(a_nIndex);
+	}
+
 }
 void Octant::Display(vector3 a_v3Color)
 {
 	//this is meant to be a recursive method, in starter code will only display the root
 	//even if other objects are created
+	for (int i = 0; i < m_uChildren; i++)
+	{
+		m_pChild[i]->Display(a_v3Color);
+	}
 	m_pModelMngr->AddWireCubeToRenderList(glm::translate(IDENTITY_M4, m_v3Center) *
 		glm::scale(vector3(m_fSize)), a_v3Color);
 }
@@ -72,6 +134,59 @@ void Octant::Subdivide(void)
 		return;
 
 	//Subdivide the space and allocate 8 children
+	m_uChildren = 8;
+
+	float size = m_fSize / 4.0f;
+	vector3 center = m_v3Center;
+
+	// Bottom
+	// Back Left
+	center.x -= size;
+	center.y -= size;
+	center.z -= size;
+	m_pChild[0] = new Octant(center, size / 2.0f);
+
+	// Back Right
+	center.x += (size / 2.0f);
+	m_pChild[1] = new Octant(center, size / 2.0f);
+
+	// Front Right
+	center.z += (size / 2.0f);
+	m_pChild[2] = new Octant(center, size / 2.0f);
+
+	// Front Left
+	center.x -= (size / 2.0f);
+	m_pChild[3] = new Octant(center, size / 2.0f);
+
+	// Top
+	// Front Left
+	center.y += (size / 2.0f);
+	m_pChild[4] = new Octant(center, size / 2.0f);
+
+	// Back Left
+	center.z -= (size / 2.0f);
+	m_pChild[5] = new Octant(center, size / 2.0f);
+
+	// Back Right
+	center.x += (size / 2.0f);
+	m_pChild[6] = new Octant(center, size / 2.0f);
+
+	// Front Right
+	center.z += (size / 2.0f);
+	m_pChild[7] = new Octant(center, size / 2.0f);
+
+	for (int i = 0; i < 8; i++)
+	{
+		// Connect leaves to tree
+		m_pChild[i]->m_pRoot = m_pRoot;
+		m_pChild[i]->m_pParent = this;
+		m_pChild[i]->m_uLevel = m_uLevel++;
+		// Subdivide again if necessary
+		if (m_pChild[i]->ContainsAtLeast(m_uIdealEntityCount))
+		{
+			m_pChild[i]->Subdivide();
+		}
+	}
 }
 bool Octant::ContainsAtLeast(uint a_nEntities)
 {
