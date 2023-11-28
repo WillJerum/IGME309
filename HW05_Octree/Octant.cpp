@@ -39,7 +39,7 @@ Octant::Octant(uint a_nMaxLevel, uint a_nIdealEntityCount)
 
 	vector3 halfWidth = pRigidBody->GetHalfWidth();
 	float max = halfWidth.x;
-	for (int i = 1; i < 3; i++)
+	for (int i = 0; i < 2; i++)
 	{
 		if (max < halfWidth[i])
 		{
@@ -80,17 +80,29 @@ bool Octant::IsColliding(uint a_uRBIndex)
 	vector3 maxOther = rigidBody->GetMaxGlobal();
 
 	// Check for collision on X
-	if ((m_v3Max.x < minOther.x) || (m_v3Min.x > maxOther.x))
+	if (m_v3Max.x < minOther.x)
+	{
+		return false;
+	}
+	if (m_v3Min.x > maxOther.x)
 	{
 		return false;
 	}
 	// Check for collision on Y
-	if ((m_v3Max.y < minOther.y) || (m_v3Min.y > maxOther.y))
+	if (m_v3Max.y < minOther.y)  
+	{
+		return false;
+	}
+	if (m_v3Min.y > maxOther.y)
 	{
 		return false;
 	}
 	// Check for collision on Z
-	if ((m_v3Max.z < minOther.z) || (m_v3Min.z > maxOther.z))
+	if (m_v3Max.z < minOther.z)
+	{
+		return false;
+	}
+	if (m_v3Min.z > maxOther.z)
 	{
 		return false;
 	}
@@ -137,6 +149,7 @@ void Octant::Subdivide(void)
 	m_uChildren = 8;
 
 	float size = m_fSize / 4.0f;
+	float size2 = size * 2.0f;
 	vector3 center = m_v3Center;
 
 	// Bottom
@@ -144,36 +157,36 @@ void Octant::Subdivide(void)
 	center.x -= size;
 	center.y -= size;
 	center.z -= size;
-	m_pChild[0] = new Octant(center, size * 2.0f);
+	m_pChild[0] = new Octant(center, size2); 
 
 	// Back Right
-	center.x += (size * 2.0f);
-	m_pChild[1] = new Octant(center, size * 2.0f);
+	center.x += (size2);
+	m_pChild[1] = new Octant(center, size2); 
 
 	// Front Right
-	center.z += (size * 2.0f);
-	m_pChild[2] = new Octant(center, size * 2.0f);
+	center.z += (size2); 
+	m_pChild[2] = new Octant(center, size2); 
 
 	// Front Left
-	center.x -= (size * 2.0f);
-	m_pChild[3] = new Octant(center, size * 2.0f);
+	center.x -= (size2); 
+	m_pChild[3] = new Octant(center, size2); 
 
 	// Top
 	// Front Left
-	center.y += (size * 2.0f);
-	m_pChild[4] = new Octant(center, size * 2.0f);
+	center.y += (size2); 
+	m_pChild[4] = new Octant(center, size2); 
 
 	// Back Left
-	center.z -= (size * 2.0f);
-	m_pChild[5] = new Octant(center, size * 2.0f);
+	center.z -= (size2);
+	m_pChild[5] = new Octant(center, size2);
 
 	// Back Right
-	center.x += (size * 2.0f);
-	m_pChild[6] = new Octant(center, size * 2.0f);
+	center.x += (size2);
+	m_pChild[6] = new Octant(center, size2);
 
 	// Front Right
-	center.z += (size * 2.0f);
-	m_pChild[7] = new Octant(center, size * 2.0f);
+	center.z += (size2);
+	m_pChild[7] = new Octant(center, size2);
 
 	for (int i = 0; i < 8; i++)
 	{
