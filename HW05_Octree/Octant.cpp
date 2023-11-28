@@ -27,8 +27,8 @@ Octant::Octant(uint a_nMaxLevel, uint a_nIdealEntityCount)
 	//The following measures all object boxes in the world
 
 	std::vector<vector3> lMinMax;
-
-	for (int i = 0; i < m_pEntityMngr->GetEntityCount(); i++)
+	int entities = m_pEntityMngr->GetEntityCount();
+	for (int i = 0; i < entities; i++)
 	{
 		Entity* thisEntity = m_pEntityMngr->GetEntity(i);
 		RigidBody* thisRigidBody = thisEntity->GetRigidBody();
@@ -205,7 +205,8 @@ bool Octant::ContainsAtLeast(uint a_nEntities)
 {
 	//You need to check how many entity objects live within this octant
 	int count = 0;
-	for (int i = 0; i < m_pEntityMngr->GetEntityCount(); i++)
+	int entities = m_pEntityMngr->GetEntityCount();
+	for (int i = 0; i < entities; i++)
 	{
 		if (IsColliding(i))
 		{
@@ -232,7 +233,8 @@ void Octant::AssignIDtoEntity(void)
 	// When a leaf is found
 	if (m_uChildren == 0)
 	{
-		for (int i = 0; i < m_pEntityMngr->GetEntityCount(); i++)
+		int entities = m_pEntityMngr->GetEntityCount();
+		for (int i = 0; i < entities; i++)
 		{
 			if (IsColliding(i))
 			{

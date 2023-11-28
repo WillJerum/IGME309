@@ -78,6 +78,9 @@ void Application::Display(void)
 }
 void Application::Release(void)
 {
+	//Release the octree
+	SafeDelete(m_pRoot);
+
 	//release GUI
 	ShutdownGUI();
 }
