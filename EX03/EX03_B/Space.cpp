@@ -18,13 +18,33 @@ Space::Space(uint a_uWidthSubdivisions, uint a_uHeightSubdivisions)
 	m_lChild.clear();
 
 	//TODO: Initialize the values of the Space
-	m_v3Size = vector3(5.0f);
-	m_v3Center = vector3(5.0f);
-	m_v3Min = vector3(5.0f);
-	m_v3Max = vector3(5.0f);
 
-	m_uSpaceCount++;
+	EntityManager* pEntityMngr = EntityManager::GetInstance();
 
+	// Initialize min and max vectors to extreme values
+	vector3 v3Min(FLT_MAX);
+	vector3 v3Max(FLT_MIN);
+
+	// Iterate through all entities to find min and max coordinates
+	uint uEntityCount = pEntityMngr->GetEntityCount();
+	for (uint i = 0; i < uEntityCount; ++i) 
+	{ 
+		Entity* pEntity = pEntityMngr->GetEntity(i); 
+		vector3 v3EntityMin = pEntity->GetRigidBody()->GetMinGlobal(); 
+		vector3 v3EntityMax = pEntity->GetRigidBody()->GetMaxGlobal();
+
+		// Update min and max values
+		v3Min = glm::min(v3Min, v3EntityMin); 
+		v3Max = glm::max(v3Max, v3EntityMax); 
+	}
+
+	// Calculate center and size of the space 
+	m_v3Center = (v3Max + v3Min) / 2.0f; 
+	m_v3Size = v3Max - v3Min; 
+	m_v3Min = v3Min; 
+	m_v3Max = v3Max; 
+	m_uSpaceCount++; 
+	 
 	ConstructTree(a_uWidthSubdivisions, a_uHeightSubdivisions);
 }
 
@@ -32,20 +52,92 @@ bool Space::IsColliding(uint a_uRBIndex)
 {
 	//TODO: Check if this space is colliding with the specified entity
 	Entity* pEntity = m_pEntityMngr->GetEntity(a_uRBIndex);
-	
+	if (pEntity == nullptr) {
+		return false; // No entity found for the given index
+	}
+
+	// Get the entity's bounding box
+	vector3 entityMin = pEntity->GetRigidBody()->GetMinGlobal();
+	vector3 entityMax = pEntity->GetRigidBody()->GetMaxGlobal();
+
+	// Check for overlap between the space's and entity's bounding boxes
+	// If one bounding box is on the left side of other
+	if (m_v3Max.x < entityMin.x || entityMax.x < m_v3Min.x)
+	{
+		return false;
+	}
+
+	// If one bounding box is above the other
+	if (m_v3Max.y < entityMin.y || entityMax.y < m_v3Min.y)
+	{
+		return false;
+	}
+
+
+	// Overlapping on both axes means there is a collision
 	return true;
 }
 
 void Space::Subdivide(uint a_uWidthSubdivisions, uint a_uHeightSubdivisions)
 {
 	//TODO: Subdivide this space
+
+	// Check if already subdivided
+	if (m_uChildCount > 0) 
+	{
+		return; 
+	}
+
+	// Calculate the size of each subdivision
+	vector3 subSize = m_v3Size / vector3(static_cast<float>(a_uWidthSubdivisions),
+		static_cast<float>(a_uHeightSubdivisions), 1.0f);
+
+	// Initialize child count and array
+	m_uChildCount = a_uWidthSubdivisions * a_uHeightSubdivisions;
+	m_pChild = new Space * [m_uChildCount];
+
+	// Create child spaces
+	for (uint x = 0; x < a_uWidthSubdivisions; ++x) 
+	{
+		for (uint y = 0; y < a_uHeightSubdivisions; ++y) 
+		{
+			// Calculate center for each child
+			vector3 childCenter = m_v3Center - (m_v3Size / 2.0f) + vector3(subSize.x * (x + 0.5f), subSize.y * (y + 0.5f), 0.0f);
+
+			// Create new Space
+			uint index = y * a_uWidthSubdivisions + x;
+			m_pChild[index] = new Space(childCenter, subSize);
+
+		}
+	}
 }
 
 void Space::AssignIDtoEntity(void)
 {
 	//TODO: Recursive method
 	//Have to traverse the tree and make sure to tell the entity manager if an entity is colliding with this space
+
+	// Find leaf nodes
+	if (m_uChildCount > 0) 
+	{
+		for (uint i = 0; i < m_uChildCount; ++i) 
+		{
+			m_pChild[i]->AssignIDtoEntity();
+		}
+	}
+	else 
+	{
+		// This is a leaf node, assign this space's ID to colliding entities
+		uint numEntities = m_pEntityMngr->GetEntityCount();
+		for (uint i = 0; i < numEntities; ++i) {
+			if (IsColliding(i)) {
+				// Set ID
+				m_pEntityMngr->AddDimension(i, m_uID);
+			}
+		}
+	}
 }
+
 
 //Does not require changes -------------------------------------------------------------------------------------------
 // You can assume the following is fine and does not need changes, you may add onto it but the code is fine as is
